@@ -2,7 +2,6 @@ package blossom
 
 import (
 	"fmt"
-	"net/http"
 )
 
 // Error represent an http error with the specified code and reason.
@@ -30,13 +29,4 @@ func (e *Error) Is(target error) bool {
 		return false
 	}
 	return e.Code == err.Code && e.Reason == err.Reason
-}
-
-// Write the error to the http response. If the reason is non-empty,
-// it writes it to the "X-Reason" header as per BUD-01.
-func (e Error) Write(w http.ResponseWriter) {
-	if e.Reason != "" {
-		w.Header().Set("X-Reason", e.Reason)
-	}
-	http.Error(w, "", e.Code)
 }
