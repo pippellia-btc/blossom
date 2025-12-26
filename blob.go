@@ -3,6 +3,7 @@ package blossom
 import (
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 )
 
@@ -23,7 +24,6 @@ type BlobMeta struct {
 }
 
 // Size returns the total size of the blob in bytes.
-// It preserves the current read position by rewinding to the start after seeking.
 func (b Blob) Size() (int64, error) {
 	if b.Data == nil {
 		return 0, nil
@@ -41,10 +41,10 @@ func (b Blob) Size() (int64, error) {
 	return size, nil
 }
 
-// MIME returns the MIME type of the blob by inspecting up to the first 512 bytes of its data.
-// It resets the read position to the start of the blob after sniffing, so the blob can be read from the beginning.
-// If the MIME type cannot be determined, it returns the default "application/octet-stream" as specified by BUD-01.
-func (b Blob) MIME() (string, error) {
+// ContentType returns the content type of the blob by inspecting up to the first 512 bytes of its data.
+// The returned string is suitable for use as a MIME type in HTTP headers (e.g. Content-Type).
+// If the type cannot be determined, it returns the default "application/octet-stream" as specified by BUD-01.
+func (b Blob) ContentType() (string, error) {
 	if b.Data == nil {
 		return "application/octet-stream", nil
 	}
@@ -60,4 +60,19 @@ func (b Blob) MIME() (string, error) {
 		return "", fmt.Errorf("failed to rewind blob after MIME sniffing: %w", err)
 	}
 	return http.DetectContentType(sniff[:n]), nil
+}
+
+// MediaType returns the media type of the blob by parsing its content type and stripping any parameters.
+// For example, if the content type is "text/html; charset=utf-8", the media type will be "text/html".
+func (b Blob) MediaType() (string, error) {
+	ct, err := b.ContentType()
+	if err != nil {
+		return "", err
+	}
+
+	media, _, err := mime.ParseMediaType(ct)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse media type %q: %w", ct, err)
+	}
+	return media, nil
 }

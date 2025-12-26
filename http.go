@@ -10,7 +10,7 @@ import (
 // WriteBlob writes the blob to the response writer.
 // It automatically sets the Content-Type and Content-Length headers according to BUD-01.
 func WriteBlob(w http.ResponseWriter, b Blob) error {
-	mime, err := b.MIME()
+	ct, err := b.ContentType()
 	if err != nil {
 		return err
 	}
@@ -20,7 +20,7 @@ func WriteBlob(w http.ResponseWriter, b Blob) error {
 		return err
 	}
 
-	w.Header().Set("Content-Type", mime)
+	w.Header().Set("Content-Type", ct)
 	w.Header().Set("Content-Length", strconv.FormatInt(size, 10))
 
 	written, err := io.Copy(w, b.Data)
