@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash"
 )
 
 type Hash [32]byte
@@ -58,6 +59,12 @@ func (h *Hash) Scan(src any) error {
 // sha256 implementation of the standard library.
 func ComputeHash(data []byte) Hash {
 	return sha256.Sum256(data)
+}
+
+// NewHasher returns a new hasher that computes a hash incrementally by calling
+// the cryptographically secure sha256 implementation of the standard library.
+func NewHasher() hash.Hash {
+	return sha256.New()
 }
 
 // ParseHash from the hexadecimal input string.
