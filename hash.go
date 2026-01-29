@@ -9,6 +9,8 @@ import (
 	"hash"
 )
 
+// Hash represents a 32-byte SHA-256 hash.
+// It's the default and only hash type supported by Blossom.
 type Hash [32]byte
 
 // Hex converts the hash into its hexadecimal representation.
@@ -81,4 +83,27 @@ func ParseHash(input string) (Hash, error) {
 
 	copy(hash[:], b)
 	return hash, nil
+}
+
+// hexValidTable is a lookup table for fast hex character validation.
+// It maps ASCII bytes to whether they are valid hex characters.
+var hexValidTable = [256]bool{
+	'0': true, '1': true, '2': true, '3': true, '4': true, '5': true, '6': true, '7': true, '8': true, '9': true,
+	'A': true, 'B': true, 'C': true, 'D': true, 'E': true, 'F': true,
+	'a': true, 'b': true, 'c': true, 'd': true, 'e': true, 'f': true,
+}
+
+// ValidateHash checks if the input string is a valid SHA-256 hash, returning an error if it is not.
+// It validates that the string is exactly 64 hexadecimal characters without decoding the entire string.
+func ValidateHash(input string) error {
+	if len(input) != 64 {
+		return errors.New("input lenght must be exactly 64 characters")
+	}
+
+	for i := 0; i < len(input); i++ {
+		if !hexValidTable[input[i]] {
+			return fmt.Errorf("invalid hex character at position %d: %c", i, input[i])
+		}
+	}
+	return nil
 }
