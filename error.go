@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// Error represent an http error with the specified code and reason.
+// Error represent an HTTP error with the specified code and reason.
 // If the reason is not empty, it is written in the "X-Reason" header as per BUD-01.
 type Error struct {
 	Code   int
