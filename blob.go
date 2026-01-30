@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-// Blob is anything that can be read, and has a known size and MIME type.
+// Blob is anything that can be read (and closed) and has a known size and MIME type.
 // This makes it possible to always write a Blob in an HTTP response with the
 // correct 'Content-Type' and 'Content-Length' headers.
 //
@@ -18,18 +18,18 @@ import (
 // For more advanced use cases (e.g. encrypted blobs, thread-safe blobs),
 // you can implement the [Blob] interface directly.
 type Blob interface {
-	io.Reader
-
-	// Size return the total size of the blob in bytes.
-	Size() int64
+	io.ReadCloser
 
 	// Type returns the content type (MIME) of the blob.
 	Type() string
+
+	// Size return the total size of the blob in bytes.
+	Size() int64
 }
 
 // blob is a generic [Blob] implementation with a reader as the underlying data.
 type blob struct {
-	io.Reader
+	io.ReadCloser
 	size int64
 	typ  string
 }
@@ -53,27 +53,27 @@ func BlobFromFile(f *os.File) (Blob, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create blob from file: %w", err)
 	}
-	return blob{Reader: f, size: info.Size(), typ: typ}, nil
+	return blob{ReadCloser: f, size: info.Size(), typ: typ}, nil
 }
 
 // BlobFromBytes creates a Blob from the given byte slice.
 // The size and content type are detected automatically.
 func BlobFromBytes(data []byte) Blob {
 	return blob{
-		Reader: bytes.NewReader(data),
-		size:   int64(len(data)),
-		typ:    http.DetectContentType(data),
+		ReadCloser: io.NopCloser(bytes.NewReader(data)),
+		size:       int64(len(data)),
+		typ:        http.DetectContentType(data),
 	}
 }
 
 // BlobFromStream creates a Blob from a reader with known size and content type.
 // It's typically used when dealing with HTTP requests or responses,
 // where the size and content type are known from the headers.
-func BlobFromStream(r io.Reader, size int64, contentType string) Blob {
+func BlobFromStream(r io.ReadCloser, size int64, contentType string) Blob {
 	return blob{
-		Reader: r,
-		size:   size,
-		typ:    contentType,
+		ReadCloser: r,
+		size:       size,
+		typ:        contentType,
 	}
 }
 
