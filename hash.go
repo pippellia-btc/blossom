@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql/driver"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"hash"
@@ -55,6 +56,28 @@ func (h *Hash) Scan(src any) error {
 	default:
 		return fmt.Errorf("cannot scan %T into Hash", src)
 	}
+}
+
+// MarshalJSON implements [json.Marshaler].
+func (h Hash) MarshalJSON() ([]byte, error) {
+	return json.Marshal(h.Hex())
+}
+
+// UnmarshalJSON implements [json.Unmarshaler].
+// It decodes directly into the Hash bytes without intermediate allocations.
+func (h *Hash) UnmarshalJSON(data []byte) error {
+	// JSON string: 64 hex chars + 2 quotes = 66 bytes
+	if len(data) != 66 {
+		return fmt.Errorf("invalid hash length: expected 64 hex characters, got %d", len(data)-2)
+	}
+	if data[0] != '"' || data[65] != '"' {
+		return errors.New("invalid JSON string for hash")
+	}
+
+	if _, err := hex.Decode(h[:], data[1:65]); err != nil {
+		return fmt.Errorf("invalid hash: %w", err)
+	}
+	return nil
 }
 
 // ComputeHash of the provided data, by calling the cryptographically secure
