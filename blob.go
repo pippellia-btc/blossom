@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 // Blob is anything that can be read (and closed) and has a known size and MIME type.
@@ -77,7 +78,7 @@ func BlobFromStream(r io.ReadCloser, size int64, contentType string) Blob {
 	}
 }
 
-// WriteBlob writes the blob to the response writer.
+// WriteBlob writes the entire blob to the response writer.
 // It automatically sets the Content-Type and Content-Length headers according to BUD-01.
 func WriteBlob(w http.ResponseWriter, b Blob) error {
 	ct := b.Type()
@@ -94,4 +95,18 @@ func WriteBlob(w http.ResponseWriter, b Blob) error {
 		return fmt.Errorf("copied size mismatch: expected %d, wrote %d", size, written)
 	}
 	return nil
+}
+
+// ServeBlob serves the blob to the response writer.
+// If the blob is seekable (implements [io.ReadSeeker]), ServeBlob automatically handles Range requests.
+// Otherwise, it falls back to streaming the full blob with [WriteBlob].
+func ServeBlob(w http.ResponseWriter, r *http.Request, b Blob) error {
+	if seeker, ok := b.(io.ReadSeeker); ok {
+		// If seekable, use http.ServeContent for full Range support.
+		// We set the Content-Type to avoid any potential MIME type sniffing issues.
+		w.Header().Set("Content-Type", b.Type())
+		http.ServeContent(w, r, "", time.Time{}, seeker)
+		return nil
+	}
+	return WriteBlob(w, b)
 }
