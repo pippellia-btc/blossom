@@ -15,7 +15,9 @@ type BlobDescriptor struct {
 	Size     int64
 	Type     string
 	Uploaded int64
-	Extra    map[string]json.RawMessage
+
+	// Extra fields to store arbitrary optional metadata.
+	Extra map[string]json.RawMessage
 }
 
 // MarshalJSON implements [json.Marshaler].

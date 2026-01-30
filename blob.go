@@ -23,7 +23,7 @@ type Blob interface {
 	// Size return the total size of the blob in bytes.
 	Size() int64
 
-	// Type returns the MIME type of the blob.
+	// Type returns the content type (MIME) of the blob.
 	Type() string
 }
 
