@@ -15,7 +15,7 @@ go get github.com/pippellia-btc/blossom
 ## Features
 
 - Zero dependencies: standard library only
-- `Hash`: 32-byte SHA-256 with JSON and SQL serialization built-in
-- `BlobDescriptor`: blob metadata with automatic handling of extra fields
 - `Blob`: interface for files, byte slices, and streams with automatic MIME type detection
+- `BlobDescriptor`: blob metadata with automatic handling of extra fields
+- `Hash`: 32-byte SHA-256 with JSON and SQL serialization built-in
 - `Error`: protocol-compliant HTTP errors with `X-Reason` header support
