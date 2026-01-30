@@ -6,6 +6,12 @@ This is a minimal, zero-dependency library that provides the core data structure
 [![Go Report Card](https://goreportcard.com/badge/github.com/pippellia-btc/blossom)](https://goreportcard.com/report/github.com/pippellia-btc/blossom)
 [![Go Reference](https://pkg.go.dev/badge/github.com/pippellia-btc/blossom.svg)](https://pkg.go.dev/github.com/pippellia-btc/blossom)
 
+## Installation
+
+```bash
+go get github.com/pippellia-btc/blossom
+```
+
 ## Features
 
 - Zero dependencies: standard library only
