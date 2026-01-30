@@ -95,7 +95,7 @@ func NewHasher() hash.Hash {
 // ParseHash from the hexadecimal input string.
 func ParseHash(input string) (Hash, error) {
 	if len(input) != 64 {
-		return Hash{}, errors.New("input lenght must be exactly 64 characters")
+		return Hash{}, errors.New("input length must be exactly 64 characters")
 	}
 
 	var hash Hash
@@ -120,7 +120,7 @@ var hexValidTable = [256]bool{
 // It validates that the string is exactly 64 hexadecimal characters without decoding the entire string.
 func ValidateHash(input string) error {
 	if len(input) != 64 {
-		return errors.New("input lenght must be exactly 64 characters")
+		return errors.New("input length must be exactly 64 characters")
 	}
 
 	for i := 0; i < len(input); i++ {
