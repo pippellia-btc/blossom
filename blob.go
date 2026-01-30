@@ -116,21 +116,6 @@ func DetectSize(r io.ReadSeeker) (int64, error) {
 	return size, nil
 }
 
-// BlobMeta groups metadata of a [Blob].
-type BlobMeta struct {
-	Hash      Hash
-	Type      string // matches [Blob.Type]
-	Size      int64
-	CreatedAt int64
-}
-
-// Extension returns the preferred file extension for the blob's content type.
-// The returned extension will begin with a leading dot, as in ".html".
-// If no suitable extension is found, it returns ".bin".
-func (b BlobMeta) Extension() string {
-	return ExtFromType(b.Type)
-}
-
 // ExtFromType returns the preferred file extension for the given content type.
 // The returned extension will begin with a leading dot, as in ".html".
 // If no suitable extension is found, it returns ".bin".
