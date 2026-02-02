@@ -51,6 +51,11 @@ func ErrUnauthorized(reason string) Error {
 	return Error{Code: http.StatusUnauthorized, Reason: reason}
 }
 
+// ErrPaymentRequired returns a 402 Payment Required error with the given reason.
+func ErrPaymentRequired(reason string) Error {
+	return Error{Code: http.StatusPaymentRequired, Reason: reason}
+}
+
 // ErrForbidden returns a 403 Forbidden error with the given reason.
 func ErrForbidden(reason string) Error {
 	return Error{Code: http.StatusForbidden, Reason: reason}
@@ -71,7 +76,22 @@ func ErrTooLarge(reason string) Error {
 	return Error{Code: http.StatusRequestEntityTooLarge, Reason: reason}
 }
 
+// ErrTooMany returns a 429 Too Many Requests error with the given reason.
+func ErrTooMany(reason string) Error {
+	return Error{Code: http.StatusTooManyRequests, Reason: reason}
+}
+
 // ErrInternal returns a 500 Internal Server Error with the given reason.
 func ErrInternal(reason string) Error {
 	return Error{Code: http.StatusInternalServerError, Reason: reason}
+}
+
+// ErrNotImplemented returns a 501 Not Implemented error with the given reason.
+func ErrNotImplemented(reason string) Error {
+	return Error{Code: http.StatusNotImplemented, Reason: reason}
+}
+
+// ErrUnavailable returns a 503 Service Unavailable error with the given reason.
+func ErrUnavailable(reason string) Error {
+	return Error{Code: http.StatusServiceUnavailable, Reason: reason}
 }
