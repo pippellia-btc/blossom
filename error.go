@@ -79,6 +79,11 @@ func ErrTooLarge(reason string) *Error {
 	return &Error{Code: http.StatusRequestEntityTooLarge, Reason: reason}
 }
 
+// ErrUnsupportedMedia returns a 415 Unsupported Media Type error with the given reason.
+func ErrUnsupportedMedia(reason string) *Error {
+	return &Error{Code: http.StatusUnsupportedMediaType, Reason: reason}
+}
+
 // ErrTooMany returns a 429 Too Many Requests error with the given reason.
 func ErrTooMany(reason string) *Error {
 	return &Error{Code: http.StatusTooManyRequests, Reason: reason}
