@@ -40,3 +40,38 @@ func WriteError(w http.ResponseWriter, e Error) {
 	}
 	http.Error(w, "", e.Code)
 }
+
+// ErrBadRequest returns a 400 Bad Request error with the given reason.
+func ErrBadRequest(reason string) Error {
+	return Error{Code: http.StatusBadRequest, Reason: reason}
+}
+
+// ErrUnauthorized returns a 401 Unauthorized error with the given reason.
+func ErrUnauthorized(reason string) Error {
+	return Error{Code: http.StatusUnauthorized, Reason: reason}
+}
+
+// ErrForbidden returns a 403 Forbidden error with the given reason.
+func ErrForbidden(reason string) Error {
+	return Error{Code: http.StatusForbidden, Reason: reason}
+}
+
+// ErrNotFound returns a 404 Not Found error with the given reason.
+func ErrNotFound(reason string) Error {
+	return Error{Code: http.StatusNotFound, Reason: reason}
+}
+
+// ErrNotAllowed returns a 405 Method Not Allowed error with the given reason.
+func ErrNotAllowed(reason string) Error {
+	return Error{Code: http.StatusMethodNotAllowed, Reason: reason}
+}
+
+// ErrTooLarge returns a 413 Payload Too Large error with the given reason.
+func ErrTooLarge(reason string) Error {
+	return Error{Code: http.StatusRequestEntityTooLarge, Reason: reason}
+}
+
+// ErrInternal returns a 500 Internal Server Error with the given reason.
+func ErrInternal(reason string) Error {
+	return Error{Code: http.StatusInternalServerError, Reason: reason}
+}
