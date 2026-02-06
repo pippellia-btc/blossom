@@ -14,6 +14,12 @@ import (
 // It's the default and only hash type supported by Blossom.
 type Hash [32]byte
 
+// IsZero reports whether the hash is the zero value (all bytes are 0).
+// This is useful for checking if the hash was set explicitly or not.
+func (h Hash) IsZero() bool {
+	return h == Hash{}
+}
+
 // Hex converts the hash into its hexadecimal representation.
 func (h Hash) Hex() string {
 	return hex.EncodeToString(h[:])
