@@ -38,8 +38,47 @@ type blob struct {
 func (b blob) Size() int64  { return b.size }
 func (b blob) Type() string { return b.typ }
 
+// BlobFromStream creates a Blob from a reader with known size and content type.
+// It's typically used when dealing with HTTP requests or responses,
+// where the size and content type are known from the headers.
+func BlobFromStream(r io.ReadCloser, size int64, contentType string) Blob {
+	return blob{
+		ReadCloser: r,
+		size:       size,
+		typ:        contentType,
+	}
+}
+
+// seekableBlob is a [Blob] implementation with a seekable reader as the underlying data.
+type seekableBlob struct {
+	io.ReadSeekCloser
+	size int64
+	typ  string
+}
+
+func (b seekableBlob) Size() int64  { return b.size }
+func (b seekableBlob) Type() string { return b.typ }
+
+// BlobFromPath creates a Blob from a file path.
+// The file size and content type are detected automatically.
+// The caller is responsible for closing the returned Blob.
+func BlobFromPath(path string) (Blob, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+
+	blob, err := BlobFromFile(f)
+	if err != nil {
+		f.Close()
+		return nil, err
+	}
+	return blob, nil
+}
+
 // BlobFromFile creates a Blob from the given file.
 // The file size and content type are detected automatically.
+// The caller is responsible for closing the returned Blob.
 func BlobFromFile(f *os.File) (Blob, error) {
 	if f == nil {
 		return nil, fmt.Errorf("file is nil")
@@ -54,27 +93,24 @@ func BlobFromFile(f *os.File) (Blob, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create blob from file: %w", err)
 	}
-	return blob{ReadCloser: f, size: info.Size(), typ: typ}, nil
+	return seekableBlob{ReadSeekCloser: f, size: info.Size(), typ: typ}, nil
+}
+
+type nopCloser struct {
+	io.ReadSeeker
+}
+
+func (_ nopCloser) Close() error {
+	return nil
 }
 
 // BlobFromBytes creates a Blob from the given byte slice.
 // The size and content type are detected automatically.
 func BlobFromBytes(data []byte) Blob {
-	return blob{
-		ReadCloser: io.NopCloser(bytes.NewReader(data)),
-		size:       int64(len(data)),
-		typ:        http.DetectContentType(data),
-	}
-}
-
-// BlobFromStream creates a Blob from a reader with known size and content type.
-// It's typically used when dealing with HTTP requests or responses,
-// where the size and content type are known from the headers.
-func BlobFromStream(r io.ReadCloser, size int64, contentType string) Blob {
-	return blob{
-		ReadCloser: r,
-		size:       size,
-		typ:        contentType,
+	return seekableBlob{
+		ReadSeekCloser: nopCloser{bytes.NewReader(data)},
+		size:           int64(len(data)),
+		typ:            http.DetectContentType(data),
 	}
 }
 
@@ -104,6 +140,7 @@ func ServeBlob(w http.ResponseWriter, r *http.Request, b Blob) error {
 	if seeker, ok := b.(io.ReadSeeker); ok {
 		// If seekable, use http.ServeContent for full Range support.
 		// We set the Content-Type to avoid any potential MIME type sniffing issues.
+		// Unfortunately http.ServeContent doesn't return errors that we can report to the caller.
 		w.Header().Set("Content-Type", b.Type())
 		http.ServeContent(w, r, "", time.Time{}, seeker)
 		return nil
